@@ -44,6 +44,7 @@ def id(x: float) -> float:
 
 
 def add(x: float, y: float) -> float:
+    """Add two numbers"""
     return x + y
 
 
@@ -70,17 +71,14 @@ def max(x: float, y: float) -> float:
         return y
 
 
-def isclose(x: float, y: float) -> bool:
+def is_close(x: float, y: float) -> bool:
     """Checks if two numbers are close in value"""
     return lt(abs(x - y), 1e-2)
 
 
 def sigmoid(x: float) -> float:
     """Calculates the sigmoid function"""
-    if x >= 0:
-        return 1 / (1 + math.exp(-x))
-    else:
-        return math.exp(x) / (1 + math.exp(x))
+    return 1 / (1 + math.exp(-x))
 
 
 def relu(x: float) -> float:
@@ -141,7 +139,7 @@ def relu_back(x: float, d: float) -> float:
 # - prod: take the product of lists
 
 
-def map(fn: Callable) -> Callable[[Iterable[float]], Iterable[float]]:
+def map(fn: Callable[[float], float]) -> Callable[[Iterable[float]], Iterable[float]]:
     """Higher-order function that applies a given function to each element of an iterable"""
 
     def function(ls: Iterable[float]) -> Iterable[float]:
@@ -153,48 +151,50 @@ def map(fn: Callable) -> Callable[[Iterable[float]], Iterable[float]]:
 def zipWith(
     fn: Callable[[float, float], float],
 ) -> Callable[[Iterable[float], Iterable[float]], Iterable[float]]:
-    """ "Higher-order function that combines elements from two iterables using a given function"""
+    """Higher-order function that combines elements from two iterables using a given function"""
 
     def apply(ls1: Iterable[float], ls2: Iterable[float]) -> Iterable[float]:
-        return [fn(x, y) for x in ls1 for y in ls2]
+        return [fn(x, y) for x,  y in zip(ls1,ls2)]
+
+    # return lambda ls1, ls2: (fn(x, y) for x, y in zip(ls1, ls2))
 
     return apply
 
 
 def reduce(
-    fn: Callable[[float], float],
-) -> Callable[[Iterable[float]], Iterable[float]]:
-    """ " Higher-order function that reduces an  iterable to  a single value using a given function"""
+    fn: Callable[[float, float], float],
+) -> Callable[[Iterable[float], float], float]:
+    """Higher-order function that reduces an  iterable to  a single value using a given function"""
 
-    def apply(ls: Iterable[float]) -> float:
-        for i in range(ls):
-            if i == 0:
-                ret = ls[i]
-            else:
-                ret = fn(ret, ls[i])
-        return ret
+    def apply(ls: Iterable[float], start: float) -> float:
+        for i in iter(ls):
+            start = fn(start, i)
+        return start
 
     return apply
 
 
 def negList(ls: Iterable[float]) -> Iterable[float]:
     """Negate all elements in a list using map"""
-    return map(neg, ls)
+    NL = map(neg)
+    return NL(ls)
 
 
 def addLists(ls1: Iterable[float], ls2: Iterable[float]) -> Iterable[float]:
-    """ "Add corresponding elements from two lists using zipWith"""
+    """Add corresponding elements from two lists using zipWith"""
     AL = zipWith(add)
     return AL(ls1, ls2)
 
 
 def sum(ls: Iterable[float]) -> float:
-    """ "Sum all elements in a list using reduce"""
+    """Sum all elements in a list using reduce"""
+    start = 0
     SL = reduce(add)
-    return SL(ls)
+    return SL(ls, start)
 
 
 def prod(ls: Iterable[float]) -> float:
-    """ "Product of all elements in a list using reduce"""
+    """Product of all elements in a list using reduce"""
+    start = 1
     ML = reduce(mul)
-    return ML(ls)
+    return ML(ls, start)

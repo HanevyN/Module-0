@@ -31,11 +31,21 @@ class Module:
 
     def train(self) -> None:
         """Set the mode of this module and all descendent modules to `train`."""
-        self._modules.__setattr__("training", True)
+        def _train(module:Module)->None:
+            module.training = True 
+            for m in module.modules():
+                _train(m)
+            
+        _train(self)
 
     def eval(self) -> None:
         """Set the mode of this module and all descendent modules to `eval`."""
-        self._modules.__setattr__("training", False)
+        def _eval(module:Module)->None:
+            module.training = False 
+            for m in module.modules():
+                _eval(m)
+   
+        _eval(self)
 
     def named_parameters(self) -> Sequence[Tuple[str, Parameter]]:
         """Collect all the parameters of this module and its descendents.
@@ -45,13 +55,23 @@ class Module:
             The name and `Parameter` of each ancestor parameter.
 
         """
-        p: Dict[str, Parameter] = self.__dict__["_parameters"]
-        return list(p.items())
+        def _named_parameters(module:Module , prefix:str)->Any:
+            """Extract modules and parameters"""
+            for name, param in module._parameters.items():
+                yield prefix + name, param
+            for name, module in module._modules.items():
+                yield from _named_parameters(module, prefix + name + ".")
+    
+        return list(_named_parameters(self, ""))
+
+        # p: Dict[str, Parameter] = self.__dict__["_parameters"]
+        # return list(p.items())
+
+
 
     def parameters(self) -> Sequence[Parameter]:
         """Enumerate over all the parameters of this module and its descendents."""
-        p: Dict[str, Parameter] = self.__dict__["_parameters"]
-        return list(p.values())
+        return [param for _, param in self.named_parameters()]
 
     def add_parameter(self, k: str, v: Any) -> Parameter:
         """Manually add a parameter. Useful helper for scalar parameters.
