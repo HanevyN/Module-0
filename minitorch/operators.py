@@ -33,9 +33,99 @@ from typing import Callable, Iterable
 
 
 # TODO: Implement for Task 0.1.
+def mul(x: float, y: float) -> float:
+    """Multiply 2 floats"""
+    return x * y
+
+
+def id(x: float) -> float:
+    """Returns the input unchanged"""
+    return x
+
+
+def add(x: float, y: float) -> float:
+    return x + y
+
+
+def neg(x: float) -> float:
+    """Negates a number"""
+    return -x
+
+
+def lt(x: float, y: float) -> bool:
+    """Checks if one number is less than another"""
+    return x < y
+
+
+def eq(x: float, y: float) -> float:
+    """Checks if two numbers are equal"""
+    return x == y
+
+
+def max(x: float, y: float) -> float:
+    """Returns the larger of two numbers"""
+    if x > y:
+        return x
+    else:
+        return y
+
+
+def isclose(x: float, y: float) -> bool:
+    """Checks if two numbers are close in value"""
+    return lt(abs(x - y), 1e-2)
+
+
+def sigmoid(x: float) -> float:
+    """Calculates the sigmoid function"""
+    if x >= 0:
+        return 1 / (1 + math.exp(-x))
+    else:
+        return math.exp(x) / (1 + math.exp(x))
+
+
+def relu(x: float) -> float:
+    """Applies the ReLU activation function"""
+    if x >= 0:
+        return x
+    else:
+        return 0
+
+
+def log(x: float) -> float:
+    """Compute the natural logorithm"""
+    return math.log(x)
+
+
+def exp(x: float) -> float:
+    """Compute the exponential function"""
+    return math.exp(x)
+
+
+def inv(x: float) -> float:
+    """Compute the natural logorithm"""
+    return 1 / (x)
+
+
+def log_back(x: float, d: float) -> float:
+    """Computes the derivative of log times a second arg"""
+    return inv(x) * d
+
+
+def inv_back(x: float, d: float) -> float:
+    """Computes the derivative of reciprocal times a second arg"""
+    return -d / x**2
+
+
+def relu_back(x: float, d: float) -> float:
+    """Computes the derivative of reciprocal times a second arg"""
+    if x > 0:
+        return d
+    else:
+        return 0
 
 
 # ## Task 0.3
+
 
 # Small practice library of elementary higher-order functions.
 
@@ -51,4 +141,60 @@ from typing import Callable, Iterable
 # - prod: take the product of lists
 
 
-# TODO: Implement for Task 0.3.
+def map(fn: Callable) -> Callable[[Iterable[float]], Iterable[float]]:
+    """Higher-order function that applies a given function to each element of an iterable"""
+
+    def function(ls: Iterable[float]) -> Iterable[float]:
+        return [fn(i) for i in ls]
+
+    return function
+
+
+def zipWith(
+    fn: Callable[[float, float], float],
+) -> Callable[[Iterable[float], Iterable[float]], Iterable[float]]:
+    """ "Higher-order function that combines elements from two iterables using a given function"""
+
+    def apply(ls1: Iterable[float], ls2: Iterable[float]) -> Iterable[float]:
+        return [fn(x, y) for x in ls1 for y in ls2]
+
+    return apply
+
+
+def reduce(
+    fn: Callable[[float], float],
+) -> Callable[[Iterable[float]], Iterable[float]]:
+    """ " Higher-order function that reduces an  iterable to  a single value using a given function"""
+
+    def apply(ls: Iterable[float]) -> float:
+        for i in range(ls):
+            if i == 0:
+                ret = ls[i]
+            else:
+                ret = fn(ret, ls[i])
+        return ret
+
+    return apply
+
+
+def negList(ls: Iterable[float]) -> Iterable[float]:
+    """Negate all elements in a list using map"""
+    return map(neg, ls)
+
+
+def addLists(ls1: Iterable[float], ls2: Iterable[float]) -> Iterable[float]:
+    """ "Add corresponding elements from two lists using zipWith"""
+    AL = zipWith(add)
+    return AL(ls1, ls2)
+
+
+def sum(ls: Iterable[float]) -> float:
+    """ "Sum all elements in a list using reduce"""
+    SL = reduce(add)
+    return SL(ls)
+
+
+def prod(ls: Iterable[float]) -> float:
+    """ "Product of all elements in a list using reduce"""
+    ML = reduce(mul)
+    return ML(ls)
